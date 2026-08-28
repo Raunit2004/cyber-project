@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block title %}CyberShield – AI Threat Scanner{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ──────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-badge">
+    <span class="pulse-dot"></span>
+    AI-Powered · Real-Time Analysis
+  </div>
+  <h1 class="hero-title">
+    Detect <span class="gradient-text">Malicious</span> URLs<br />
+    &amp; Phishing Emails
+  </h1>
+  <p class="hero-sub">
+    Powered by Machine Learning. Paste any URL or email body below and our
+    Random Forest classifier will assess the threat in milliseconds.
+  </p>
+
+  <!-- ── Scan Card ──────────────────────────────────────────── -->
+  <div class="scan-card glass">
+
+    <!-- Tab selector -->
+    <div class="tab-bar" role="tablist">
+      <button class="tab active" id="tab-url" role="tab"
+              aria-controls="panel-url" aria-selected="true"
+              onclick="switchTab('url')">
+        🔗 &nbsp;URL Scanner
+      </button>
+      <button class="tab" id="tab-email" role="tab"
+              aria-controls="panel-email" aria-selected="false"
+              onclick="switchTab('email')">
+        ✉️ &nbsp;Email Scanner
+      </button>
+    </div>
+
+    <!-- URL Panel -->
+    <div class="tab-panel active" id="panel-url" role="tabpanel">
+      <div class="input-group">
+        <label for="url-input" class="input-label">Enter a URL to analyse</label>
+        <div class="input-row">
+          <input type="url" id="url-input" class="scan-input"
+                 placeholder="https://example.com/login"
+                 autocomplete="off" spellcheck="false" />
+          <button class="btn btn-primary btn-scan" id="btn-scan-url"
+                  onclick="scanURL()">
+            <span class="btn-text">Scan URL</span>
+            <span class="btn-loader hidden">⟳</span>
+          </button>
+        </div>
+      </div>
+      <div class="sample-pills">
+        <span class="pills-label">Try a sample:</span>
+        <button class="pill pill-safe"     onclick="fillSample('url','https://www.github.com')">github.com</button>
+        <button class="pill pill-danger"   onclick="fillSample('url','http://secure-login-paypal.com/verify')">paypal phish</button>
+        <button class="pill pill-warning"  onclick="fillSample('url','https://bit.ly/secure-login')">bit.ly short</button>
+        <button class="pill pill-danger"   onclick="fillSample('url','http://192.168.1.1/admin')">IP address</button>
+      </div>
+    </div>
+
+    <!-- Email Panel -->
+    <div class="tab-panel" id="panel-email" role="tabpanel">
+      <div class="input-group">
+        <label for="email-input" class="input-label">Paste email body to analyse</label>
+        <textarea id="email-input" class="scan-input scan-textarea" rows="5"
+                  placeholder="Paste the email content here…"></textarea>
+        <button class="btn btn-primary btn-scan" id="btn-scan-email"
+                onclick="scanEmail()">
+          <span class="btn-text">Analyse Email</span>
+          <span class="btn-loader hidden">⟳</span>
+        </button>
+      </div>
+      <div class="sample-pills">
+        <span class="pills-label">Try a sample:</span>
+        <button class="pill pill-safe"   onclick="fillSample('email','Hi team, please find the meeting notes attached. Let me know if you have any questions.')">legit email</button>
+        <button class="pill pill-danger" onclick="fillSample('email','URGENT: Your account will be suspended! Please verify your details at http://secure-login-paypal.com/verify immediately.')">phishing email</button>
+      </div>
+    </div>
+
+  </div><!-- /scan-card -->
+
+  <!-- ── Result Panel ───────────────────────────────────────── -->
+  <div class="result-panel glass hidden" id="result-panel">
+    <div class="result-header">
+      <div class="threat-gauge-wrap">
+        <svg class="threat-gauge" viewBox="0 0 120 70" id="gauge-svg">
+          <!-- track -->
+          <path d="M10,65 A55,55 0 0,1 110,65" fill="none"
+                stroke="rgba(255,255,255,.08)" stroke-width="10"
+                stroke-linecap="round"/>
+          <!-- fill -->
+          <path d="M10,65 A55,55 0 0,1 110,65" fill="none"
+                id="gauge-fill" stroke="#00ff88" stroke-width="10"
+                stroke-linecap="round"
+                stroke-dasharray="173"
+                stroke-dashoffset="173"/>
+          <!-- needle -->
+          <line id="gauge-needle" x1="60" y1="65" x2="60" y2="20"
+                stroke="#fff" stroke-width="2.5"
+                stroke-linecap="round"
+                transform-origin="60 65"
+                transform="rotate(-90)"/>
+        </svg>
+        <div class="gauge-pct" id="gauge-pct">0%</div>
+      </div>
+
+      <div class="result-meta">
+        <div class="result-badge" id="result-badge">—</div>
+        <div class="result-risk"  id="result-risk">—</div>
+        <div class="result-value" id="result-value"></div>
+      </div>
+    </div>
+
+    <div class="result-features hidden" id="result-features">
+      <h3 class="features-title">Feature Breakdown</h3>
+      <div class="features-grid" id="features-grid"></div>
+    </div>
+
+    <div class="result-footer">
+      <button class="btn btn-ghost btn-sm" onclick="clearResult()">Clear</button>
+      <span class="result-time" id="result-time"></span>
+    </div>
+  </div>
+
+</section>
+
+<!-- ── Stats Strip ────────────────────────────────────────────── -->
+<section class="stats-strip">
+  <div class="stat-item" id="stat-total">
+    <div class="stat-num" data-target="0">—</div>
+    <div class="stat-lbl">Total Scans</div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat-item" id="stat-flagged">
+    <div class="stat-num" data-target="0">—</div>
+    <div class="stat-lbl">Threats Found</div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <div class="stat-num" id="stat-accuracy">—</div>
+    <div class="stat-lbl">URL Model Accuracy</div>
+  </div>
+  <div class="stat-divider"></div>
+  <div class="stat-item">
+    <div class="stat-num" id="stat-email-accuracy">—</div>
+    <div class="stat-lbl">Email Model Accuracy</div>
+  </div>
+</section>
+
+<!-- ── How it works ───────────────────────────────────────────── -->
+<section class="how-section">
+  <h2 class="section-title">How It Works</h2>
+  <div class="how-grid">
+    <div class="how-card glass">
+      <div class="how-icon">🔍</div>
+      <h3>Feature Extraction</h3>
+      <p>18+ structural signals are extracted from the URL — length, subdomain depth, IP presence, shortener usage, suspicious keywords, and more.</p>
+    </div>
+    <div class="how-card glass">
+      <div class="how-icon">🌲</div>
+      <h3>Random Forest</h3>
+      <p>An ensemble of 100 decision trees votes on the threat classification, producing a calibrated probability score.</p>
+    </div>
+    <div class="how-card glass">
+      <div class="how-icon">📊</div>
+      <h3>Risk Assessment</h3>
+      <p>The confidence score is mapped to LOW / MEDIUM / HIGH risk levels so you can make informed decisions instantly.</p>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Load stats on page load
+  loadStats();
+</script>
+{% endblock %}

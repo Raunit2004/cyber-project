@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Create Account – CyberShield{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+  <div class="auth-card glass">
+    <div class="auth-header">
+      <div class="auth-logo">⬡</div>
+      <h1 class="auth-title">Create account</h1>
+      <p class="auth-sub">Free forever · No credit card required</p>
+    </div>
+
+    <form class="auth-form" method="POST" action="{{ url_for('auth.register') }}" id="register-form">
+      <div class="field">
+        <label for="username" class="field-label">Username</label>
+        <input type="text" id="username" name="username" class="field-input"
+               placeholder="cyberuser" value="{{ username or '' }}"
+               autocomplete="username" minlength="3" required />
+      </div>
+
+      <div class="field">
+        <label for="email" class="field-label">Email address</label>
+        <input type="email" id="email" name="email" class="field-input"
+               placeholder="you@example.com" value="{{ email or '' }}"
+               autocomplete="email" required />
+      </div>
+
+      <div class="field">
+        <label for="password" class="field-label">Password</label>
+        <div class="field-pass-wrap">
+          <input type="password" id="password" name="password" class="field-input"
+                 placeholder="Min 6 characters" autocomplete="new-password"
+                 minlength="6" required />
+          <button type="button" class="show-pass" onclick="togglePass('password')"
+                  aria-label="Toggle password visibility">👁</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="confirm_password" class="field-label">Confirm password</label>
+        <div class="field-pass-wrap">
+          <input type="password" id="confirm_password" name="confirm_password"
+                 class="field-input" placeholder="Repeat password"
+                 autocomplete="new-password" minlength="6" required />
+          <button type="button" class="show-pass"
+                  onclick="togglePass('confirm_password')"
+                  aria-label="Toggle password visibility">👁</button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full" id="register-btn">
+        Create Account
+      </button>
+    </form>
+
+    <p class="auth-switch">
+      Already have an account?
+      <a href="{{ url_for('auth.login') }}">Log in →</a>
+    </p>
+  </div>
+</section>
+{% endblock %}

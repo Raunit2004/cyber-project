@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Scan History – CyberShield{% endblock %}
+
+{% block content %}
+<section class="page-section">
+  <div class="page-header">
+    <h1 class="page-title">Scan History</h1>
+    <p class="page-sub">All your past URL and email scans</p>
+  </div>
+
+  <div class="table-card glass">
+    <div class="table-header">
+      <h2 class="table-title">{{ pagination.total }} Total Scans</h2>
+      <div class="filter-row">
+        <input type="text" id="history-filter" class="filter-input"
+               placeholder="Filter results…" oninput="filterHistory(this.value)" />
+      </div>
+    </div>
+
+    {% if pagination.items %}
+    <div class="table-wrap" id="history-table-wrap">
+      <table class="data-table" id="history-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Type</th>
+            <th>Input</th>
+            <th>Verdict</th>
+            <th>Risk</th>
+            <th>Confidence</th>
+            <th>Scanned At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for scan in pagination.items %}
+          <tr class="scan-row" data-search="{{ scan.scan_type }} {{ scan.input_value | lower }} {{ scan.label | lower }} {{ scan.risk_level | lower }}">
+            <td class="cell-id">{{ scan.id }}</td>
+            <td><span class="type-badge type-{{ scan.scan_type }}">{{ scan.scan_type | upper }}</span></td>
+            <td class="cell-input" title="{{ scan.input_value }}">{{ scan.input_value[:70] }}{% if scan.input_value|length > 70 %}…{% endif %}</td>
+            <td><span class="verdict-badge verdict-{{ scan.label | lower | replace(' ','') }}">{{ scan.label }}</span></td>
+            <td><span class="risk-chip risk-{{ scan.risk_level | lower }}">{{ scan.risk_level }}</span></td>
+            <td>
+              <div class="conf-bar-wrap">
+                <div class="conf-bar" style="width:{{ scan.confidence }}%"></div>
+                <span>{{ scan.confidence }}%</span>
+              </div>
+            </td>
+            <td class="cell-time">{{ scan.scanned_at.strftime('%d %b %Y, %H:%M') if scan.scanned_at else '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+    <div class="pagination">
+      {% if pagination.has_prev %}
+        <a href="?page={{ pagination.prev_num }}" class="page-btn">← Prev</a>
+      {% endif %}
+      {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+          <a href="?page={{ p }}"
+             class="page-btn {% if p == pagination.page %}active{% endif %}">{{ p }}</a>
+        {% else %}
+          <span class="page-ellipsis">…</span>
+        {% endif %}
+      {% endfor %}
+      {% if pagination.has_next %}
+        <a href="?page={{ pagination.next_num }}" class="page-btn">Next →</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <p>No scans recorded yet. <a href="{{ url_for('main.index') }}">Go scan something!</a></p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

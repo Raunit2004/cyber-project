@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Log In – CyberShield{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+  <div class="auth-card glass">
+    <div class="auth-header">
+      <div class="auth-logo">⬡</div>
+      <h1 class="auth-title">Welcome back</h1>
+      <p class="auth-sub">Log in to track your scan history</p>
+    </div>
+
+    <form class="auth-form" method="POST" action="{{ url_for('auth.login') }}" id="login-form">
+      <div class="field">
+        <label for="identifier" class="field-label">Username or Email</label>
+        <input type="text" id="identifier" name="identifier" class="field-input"
+               placeholder="you@example.com" autocomplete="username" required />
+      </div>
+
+      <div class="field">
+        <label for="password" class="field-label">Password</label>
+        <div class="field-pass-wrap">
+          <input type="password" id="password" name="password" class="field-input"
+                 placeholder="••••••••" autocomplete="current-password" required />
+          <button type="button" class="show-pass" onclick="togglePass('password')"
+                  aria-label="Toggle password visibility">👁</button>
+        </div>
+      </div>
+
+      <label class="checkbox-label">
+        <input type="checkbox" name="remember" value="1" />
+        <span>Remember me</span>
+      </label>
+
+      <button type="submit" class="btn btn-primary btn-full" id="login-btn">
+        Log In
+      </button>
+    </form>
+
+    <p class="auth-switch">
+      Don't have an account?
+      <a href="{{ url_for('auth.register') }}">Sign up free →</a>
+    </p>
+  </div>
+</section>
+{% endblock %}
