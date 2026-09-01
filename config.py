@@ -21,8 +21,14 @@ class ProductionConfig(Config):
     # In production, ensure SECRET_KEY is set via environment variable
     # In production, we'd typically use a more robust DB like PostgreSQL
     
+class TestingConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    WTF_CSRF_ENABLED = False
+
 config = {
     'development': DevelopmentConfig,
     'production': ProductionConfig,
+    'testing': TestingConfig,
     'default': DevelopmentConfig
 }

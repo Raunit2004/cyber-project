@@ -41,7 +41,7 @@
             <td><span class="risk-chip risk-{{ scan.risk_level | lower }}">{{ scan.risk_level }}</span></td>
             <td>
               <div class="conf-bar-wrap">
-                <div class="conf-bar" style="width:{{ scan.confidence }}%"></div>
+                <div class="conf-bar" data-width="{{ scan.confidence }}%"></div>
                 <span>{{ scan.confidence }}%</span>
               </div>
             </td>
@@ -80,4 +80,16 @@
     {% endif %}
   </div>
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.conf-bar').forEach(bar => {
+      if (bar.dataset.width) {
+        bar.style.width = bar.dataset.width;
+      }
+    });
+  });
+</script>
 {% endblock %}

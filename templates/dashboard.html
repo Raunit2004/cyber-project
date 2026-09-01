@@ -124,7 +124,7 @@
             <td><span class="risk-chip risk-{{ scan.risk_level | lower }}">{{ scan.risk_level }}</span></td>
             <td>
               <div class="conf-bar-wrap">
-                <div class="conf-bar" style="width:{{ scan.confidence }}%"></div>
+                <div class="conf-bar" {{ 'style="width:' ~ scan.confidence ~ '%;"' | safe }}></div>
                 <span>{{ scan.confidence }}%</span>
               </div>
             </td>

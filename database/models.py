@@ -19,6 +19,9 @@ class User(UserMixin, db.Model):
     scans = db.relationship('ScanHistory', backref='user', lazy='dynamic',
                             cascade='all, delete-orphan')
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
     def set_password(self, password: str):
         self.password_hash = generate_password_hash(password)
 
@@ -41,6 +44,9 @@ class ScanHistory(db.Model):
     risk_level   = db.Column(db.String(10), nullable=False)   # 'HIGH'/'MEDIUM'/'LOW'
     confidence   = db.Column(db.Float, nullable=False)        # 0–100 %
     scanned_at   = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), index=True)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def to_dict(self) -> dict:
         return {

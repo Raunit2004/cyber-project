@@ -1,5 +1,6 @@
 import json
 import os
+import re
 from flask import Blueprint, request, jsonify, current_app
 from flask_login import current_user
 from database.models import ScanHistory, db
@@ -30,14 +31,30 @@ def get_email_detector():
 
 # ─── Helper ────────────────────────────────────────────────────────────────────
 
+def redact_sensitive_data(text: str) -> str:
+    """Redact passwords and API keys from scanned input before saving."""
+    if not isinstance(text, str):
+        return text
+    # Mask URL query parameters (e.g., password=..., api_key=...)
+    text = re.sub(r'(?i)(password|pass|pwd|api_?key|key|token|secret)=([^&\s]+)', r'\1=***', text)
+    # Mask Bearer tokens
+    text = re.sub(r'(?i)(bearer\s+)[A-Za-z0-9\-\._~+]+', r'\1***', text)
+    # Mask Google API keys or similar structured keys
+    text = re.sub(r'(AIza[0-9A-Za-z\-_]{35})', r'***', text)
+    return text
+
+
 def _save_scan(scan_type: str, input_value: str, label: str,
                risk_level: str, confidence: float):
     """Persist a scan record to the database."""
     user_id = current_user.id if current_user.is_authenticated else None
+    
+    redacted_input = redact_sensitive_data(input_value)
+    
     record = ScanHistory(
         user_id=user_id,
         scan_type=scan_type,
-        input_value=input_value[:2000],   # cap stored length
+        input_value=redacted_input[:2000],   # cap stored length
         label=label,
         risk_level=risk_level,
         confidence=confidence,
